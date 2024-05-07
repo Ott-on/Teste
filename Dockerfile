@@ -1,15 +1,16 @@
-FROM mcr.microsoft.com/java/jdk:17-windowsservercore-ltsc2019 AS build
+FROM ubuntu:latest AS build
 
-WORKDIR /app
-COPY . .
+RUN apt-get update
+RUN apt-get install openjdk-17-jdk -y
+COPY . . 
 
-RUN choco install maven -y
+RUN apt-get install maven -y
 RUN mvn clean install
 
-FROM mcr.microsoft.com/java/jre:17-windowsservercore-ltsc2019
+FROM openjdk:17-jdk-slim
 
 EXPOSE 8080
 
-COPY --from=build /app/target/api-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /target/api-0.0.1-SNAPSHOT.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT [ "java", "-jar", "app.jar" ]
